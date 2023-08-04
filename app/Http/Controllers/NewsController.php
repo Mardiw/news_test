@@ -6,6 +6,7 @@ use App\Http\Resources\NewsResource;
 use App\Models\News;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Events\NewsEvent;
 
 class NewsController extends Controller
 {
@@ -54,7 +55,7 @@ class NewsController extends Controller
         $newNews->image = $directory.$imageName;
 
         $newNews->save();
-
+        event(new NewsEvent($newNews->id, 'created'));
         return response([ 'news' => new
         NewsResource($newNews),
         'message' => 'Success'], 200);
