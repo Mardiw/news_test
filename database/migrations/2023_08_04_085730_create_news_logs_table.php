@@ -15,10 +15,7 @@ class CreateNewsLogsTable extends Migration
     {
         Schema::create('news_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('news_id')
-                    ->constrained('news')
-                    ->onUpdate('cascade')
-                    ->onDelete('restrict');
+            $table->foreignId('news_id');
             $table->string('action');
             $table->timestamps();
         });

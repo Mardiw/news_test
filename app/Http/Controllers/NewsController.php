@@ -49,16 +49,18 @@ class NewsController extends Controller
         $newNews->content = $request->content;
 
         $image = $request->file('image');
-        $directory ='image/news/';
-        $imageName = uniqid().'_'.$image->getClientOriginalName();
-        Storage::disk('public')->put($directory.$imageName, file_get_contents($image));
-        $newNews->image = $directory.$imageName;
+        $directory = 'image/news/';
+        $imageName = uniqid() . '_' . $image->getClientOriginalName();
+        Storage::disk('public')->put($directory . $imageName, file_get_contents($image));
+        $newNews->image = $directory . $imageName;
 
         $newNews->save();
         event(new NewsEvent($newNews->id, 'created'));
-        return response([ 'news' => new
-        NewsResource($newNews),
-        'message' => 'Success'], 200);
+        return response([
+            'news' => new
+                NewsResource($newNews),
+            'message' => 'Success'
+        ], 200);
     }
 
     /**
@@ -92,7 +94,30 @@ class NewsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $news = News::findOrFail($id);
+        $this->validate($request, [
+            'title' => 'required',
+            'content' => 'required'
+        ]);
+
+        $news->title = $request->title;
+        $news->content = $request->content;
+
+        $image = $request->file('image');
+        if ($image) {
+            Storage::disk('public')->delete($news->image);
+            $directory = 'image/news/';
+            $imageName = uniqid() . '_' . $image->getClientOriginalName();
+            Storage::disk('public')->put($directory . $imageName, file_get_contents($image));
+            $news->image = $directory . $imageName;
+        }
+        $news->save();
+        event(new NewsEvent($news->id, 'updated'));
+        return response([
+            'news' => new
+                NewsResource($news),
+            'message' => 'Success'
+        ], 200);
     }
 
     /**
@@ -103,6 +128,10 @@ class NewsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $news = News::findOrFail($id);
+        event(new NewsEvent($news->id, 'deleted'));
+        Storage::disk('public')->delete($news->image);
+        $news->delete();
+        return response(['message' => 'News has been deleted']);
     }
 }

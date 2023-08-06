@@ -20,7 +20,7 @@ Route::middleware('auth:api')->prefix('v1')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::apiResource('/news', App\Http\Controllers\NewsController::class);
+    Route::apiResource('/news', App\Http\Controllers\NewsController::class)->middleware('checkRole:admin');
 });
 
 // Route::middleware('auth:api')->group(function () {
