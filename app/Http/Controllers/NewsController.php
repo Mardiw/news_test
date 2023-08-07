@@ -7,6 +7,7 @@ use App\Models\News;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Events\NewsEvent;
+use Illuminate\Support\Facades\Auth;
 
 class NewsController extends Controller
 {
@@ -47,6 +48,7 @@ class NewsController extends Controller
         $newNews = new News();
         $newNews->title = $request->title;
         $newNews->content = $request->content;
+        $newNews->created_by = Auth::id();
 
         $image = $request->file('image');
         $directory = 'image/news/';
@@ -71,7 +73,8 @@ class NewsController extends Controller
      */
     public function show($id)
     {
-        //
+        $news = News::with('comments')->findOrFail($id);
+        return response([ 'news' => new NewsResource($news), 'message' => 'Success'], 200);
     }
 
     /**
@@ -102,6 +105,7 @@ class NewsController extends Controller
 
         $news->title = $request->title;
         $news->content = $request->content;
+        $news->updated_by = Auth::id();
 
         $image = $request->file('image');
         if ($image) {
@@ -133,5 +137,14 @@ class NewsController extends Controller
         Storage::disk('public')->delete($news->image);
         $news->delete();
         return response(['message' => 'News has been deleted']);
+    }
+
+    public function news_list(Request $request){
+        $perPage = $request->perPage;
+        $news = News::paginate($perPage);
+        return response([
+            'news' => NewsResource::collection($news),
+            'message' => 'Success'
+        ], 200);
     }
 }

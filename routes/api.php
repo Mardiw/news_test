@@ -20,14 +20,10 @@ Route::middleware('auth:api')->prefix('v1')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::apiResource('/news', App\Http\Controllers\NewsController::class)->middleware('checkRole:admin');
-});
+    Route::apiResource('/news', App\Http\Controllers\NewsController::class)->middleware('checkRole:admin')->except(['show']);
+    Route::post('/news_list', [App\Http\Controllers\NewsController::class, 'news_list']);
+    
+    Route::apiResource('/comments', App\Http\Controllers\CommentController::class)->middleware('checkRole:non_admin');
 
-// Route::middleware('auth:api')->group(function () {
-//     Route::post('/logout', [App\Http\Controllers\Api\AuthController::class, 'logout']);
-//     Route::apiResource('/employee', App\Http\Controllers\EmployeeController::class);
-//     Route::apiResource('/supplier', App\Http\Controllers\SupplierController::class);
-//     Route::apiResource('/category', App\Http\Controllers\CategoryController::class);
-//     Route::apiResource('/product', App\Http\Controllers\ProductController::class);
-//     Route::apiResource('/expense', App\Http\Controllers\ExpenseController::class);
-// });
+    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout']);
+});
